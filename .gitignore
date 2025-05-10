@@ -1,0 +1,7 @@
+*.pyc
+*.avi
+*.mp4
+__pycache__
+Result_SQI/
+keep_local/
+Result_PTT/
