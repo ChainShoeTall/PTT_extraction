@@ -1,6 +1,7 @@
 *.pyc
 *.avi
 *.mp4
+module-*/
 __pycache__
 Result_SQI/
 keep_local/
