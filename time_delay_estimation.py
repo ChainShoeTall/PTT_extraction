@@ -29,7 +29,7 @@ def frac_delay(x, y, fs, **kwargs):
     else:
         delta = 0.0
     frac_delay = (peak_lag + delta) / fs   # convert to seconds
-    return frac_delay
+    return frac_delay, corr[k0]
 
 def sinc_interp(x, y, fs, **kwargs):
     """
@@ -52,12 +52,16 @@ def sinc_interp(x, y, fs, **kwargs):
     cross_spec = np.pad(cross_spec, (0, M//2-N//2), constant_values=(0,))
     corr = np.fft.irfft(cross_spec, n=M)
     corr = np.roll(corr, M//2)  
-    valid_lags = np.arange(-N+1, N)
-    corr_valid = corr[M//2 - (N-1) : M//2 + (N-1) + 1]
+    # valid_lags = np.arange(-N+1, N)
+    # corr_valid = corr[M//2 - (N-1) : M//2 + (N-1) + 1]
+    max_lag = int(0.1*fs)
+    valid_lags = np.arange(-max_lag+1, max_lag)
+    corr_valid = corr[M//2 - max_lag + 1 : M//2 + max_lag]
+
     k0 = np.argmax(corr_valid)
     peak_lag_frac = valid_lags[0] + k0
 
-    return (peak_lag_frac/scale_factor) / fs  # convert to seconds
+    return (peak_lag_frac/scale_factor) / fs, np.max(corr_valid)  # convert to seconds
 
 def gcc_delay(x, y, fs, **kwargs):
     """
@@ -72,7 +76,7 @@ def gcc_delay(x, y, fs, **kwargs):
         delay in seconds
     """
     PHAT_weight = kwargs.get('PHAT_weight', False)
-    tau_grid = kwargs.get('tau_grid', np.linspace(-.1, .1, 1000))
+    tau_grid = kwargs.get('tau_grid', np.linspace(0, .1, 1000))
     
     N = len(x)
     X = np.fft.rfft(x, n=N)
@@ -90,4 +94,4 @@ def gcc_delay(x, y, fs, **kwargs):
         gcc_phat = np.fft.irfft(C_phat, n=N)
         gcc_list.append(gcc_phat[0])
     
-    return tau_grid[np.argmax(gcc_list)]  # already in seconds
+    return tau_grid[np.argmax(gcc_list)], np.max(gcc_list)  # already in seconds

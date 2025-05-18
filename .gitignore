@@ -6,3 +6,5 @@ __pycache__
 Result_SQI/
 keep_local/
 Result_PTT/
+
+rgb_cleaning.ipynb
