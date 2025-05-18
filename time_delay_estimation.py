@@ -54,7 +54,7 @@ def sinc_interp(x, y, fs, **kwargs):
     corr = np.roll(corr, M//2)  
     # valid_lags = np.arange(-N+1, N)
     # corr_valid = corr[M//2 - (N-1) : M//2 + (N-1) + 1]
-    max_lag = int(0.1*fs)
+    max_lag = int(0.1*fs*scale_factor)
     valid_lags = np.arange(-max_lag+1, max_lag)
     corr_valid = corr[M//2 - max_lag + 1 : M//2 + max_lag]
 
