@@ -95,3 +95,40 @@ def gcc_delay(x, y, fs, **kwargs):
         gcc_list.append(gcc_phat[0])
     
     return tau_grid[np.argmax(gcc_list)], np.max(gcc_list)  # already in seconds
+
+
+def peak_ptt(prox_signal, dist_signal, ts, max_diff=0.1, median_flag=False):
+    from ampdlib import ampd
+    prox_peaks = ampd(prox_signal)
+    dist_peaks = ampd(dist_signal)
+    prox_ts = ts[prox_peaks]
+    dist_ts = ts[dist_peaks]
+    matched_proximal, matched_distal = match_peaks(prox_ts, dist_ts, max_diff=max_diff) # max_diff in seconds
+    if median_flag:
+        ptt_list = np.median(matched_distal - matched_proximal)
+    else:
+        ptt_list = np.mean(matched_distal - matched_proximal)
+    return ptt_list
+
+
+def match_peaks(proximal_peaks, distal_peaks, max_diff=10):
+    # Initialize lists to store matching peaks
+    matched_proximal = []
+    matched_distal = []
+
+    # Find closest matches
+    for proximal_peak in proximal_peaks:
+        # Find closest forehead peak
+        diffs = distal_peaks - proximal_peak
+        abs_diffs = np.abs(diffs)
+        min_diff_idx = np.argmin(abs_diffs)       
+        
+        # if diffs[min_diff_idx] <= max_diff and diffs[min_diff_idx]>0:
+        if np.abs(diffs[min_diff_idx]) <= max_diff:
+            matched_proximal.append(proximal_peak)
+            matched_distal.append(distal_peaks[min_diff_idx])
+
+    # Convert to numpy arrays
+    matched_proximal = np.array(matched_proximal)
+    matched_distal = np.array(matched_distal)
+    return matched_proximal, matched_distal
